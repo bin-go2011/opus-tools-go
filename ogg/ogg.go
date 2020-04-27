@@ -11,13 +11,6 @@ type SyncState struct {
 	bodybytes   int32
 }
 
-type Page struct {
-	header     uintptr
-	header_len int32
-	body       uintptr
-	body_len   int32
-}
-
 func (oy *SyncState) Init() int32 {
 	return oggSyncInit(oy)
 }
@@ -40,4 +33,15 @@ func (oy *SyncState) NewBuffer(size int) []byte {
 
 func (oy *SyncState) Wrote(bytes int) int32 {
 	return oggSyncWrote(oy, bytes)
+}
+
+type Page struct {
+	header     uintptr
+	header_len int32
+	body       uintptr
+	body_len   int32
+}
+
+func (og *Page) Serialno() int32 {
+	return oggPageSerialno(og)
 }

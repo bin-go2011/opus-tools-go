@@ -66,3 +66,8 @@ func oggSyncWrote(oy *SyncState, bytes int) int32 {
 	r1, _, _ := oggSyncWroteProc.Call(uintptr(unsafe.Pointer(oy)), uintptr(bytes))
 	return int32(r1)
 }
+
+func oggPageSerialno(og *Page) int32 {
+	r1, _, _ := oggPageSerialnoProc.Call(uintptr(unsafe.Pointer(og)))
+	return int32(r1)
+}
