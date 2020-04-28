@@ -16,7 +16,10 @@ var (
 	oggSyncPageSeekProc,
 	oggSyncBufferProc,
 	oggSyncWroteProc,
-	oggPageSerialnoProc *windows.Proc
+	oggPageSerialnoProc,
+	oggStreamInitProc,
+	oggStreamPageinProc,
+	oggStreamPacketoutProc *windows.Proc
 )
 
 func init() {
@@ -30,6 +33,9 @@ func init() {
 	oggSyncBufferProc = oggDLL.MustFindProc("ogg_sync_buffer")
 	oggSyncWroteProc = oggDLL.MustFindProc("ogg_sync_wrote")
 	oggPageSerialnoProc = oggDLL.MustFindProc("ogg_page_serialno")
+	oggStreamInitProc = oggDLL.MustFindProc("ogg_stream_init")
+	oggStreamPageinProc = oggDLL.MustFindProc("ogg_stream_pagein")
+	oggStreamPacketoutProc = oggDLL.MustFindProc("ogg_stream_packetout")
 }
 
 func oggSyncInit(oy *SyncState) int32 {
@@ -69,5 +75,20 @@ func oggSyncWrote(oy *SyncState, bytes int) int32 {
 
 func oggPageSerialno(og *Page) int32 {
 	r1, _, _ := oggPageSerialnoProc.Call(uintptr(unsafe.Pointer(og)))
+	return int32(r1)
+}
+
+func oggStreamInit(os *StreamState, serialno int) int32 {
+	r1, _, _ := oggStreamInitProc.Call(uintptr(unsafe.Pointer(os)), uintptr(serialno))
+	return int32(r1)
+}
+
+func oggStreamPagein(os *StreamState, og *Page) int32 {
+	r1, _, _ := oggStreamPageinProc.Call(uintptr(unsafe.Pointer(os)), uintptr(unsafe.Pointer(og)))
+	return int32(r1)
+}
+
+func oggStreamPacketout(os *StreamState, op *Packet) int32 {
+	r1, _, _ := oggStreamPacketoutProc.Call(uintptr(unsafe.Pointer(os)), uintptr(unsafe.Pointer(op)))
 	return int32(r1)
 }
