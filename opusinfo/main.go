@@ -9,6 +9,43 @@ import (
 
 const CHUNK = 4500
 
+func find_stream_processor(set *stream_set, page *ogg.Page) *stream_processor {
+	var invalid int32
+	var constraint int32
+
+	serial := uint32(page.Serialno())
+
+	for _, stream := range set.streams {
+		if serial == stream.serial {
+
+		}
+	}
+
+	set.in_headers = 1
+
+	stream := stream_processor{
+		isnew:               1,
+		isillegal:           invalid,
+		constraint_violated: constraint,
+		seen_file_icons:     0,
+	}
+	set.streams = append(set.streams, stream)
+
+	{
+		var packet ogg.Packet
+		stream.os.Init(int(serial))
+		stream.os.Pagein(page)
+		res := stream.os.Packetout(&packet)
+		if res <= 0 {
+
+		} else if packet.Bytes() >= 19 && bytePtrToString(packet.Packet())[:8] == "OpusHead" {
+			fmt.Println("OpusHead")
+		}
+	}
+	fmt.Println(len(set.streams))
+	return nil
+}
+
 func get_next_page(file *os.File, ogsync *ogg.SyncState, page *ogg.Page, written *int) int {
 	for {
 		if ret := ogsync.PageSeek(page); ret > 0 {
@@ -30,13 +67,14 @@ func get_next_page(file *os.File, ogsync *ogg.SyncState, page *ogg.Page, written
 			panic(err)
 		}
 		ogsync.Wrote(n)
+		*written += n
 	}
 
 	return 1
 }
 
-func main() {
-	file, err := os.Open(os.Args[1])
+func process_file(name string) {
+	file, err := os.Open(name)
 	if err != nil {
 		panic(err)
 	}
@@ -53,5 +91,12 @@ func main() {
 
 	written := 0
 	get_next_page(file, &ogsync, &page, &written)
-	fmt.Println(ogsync)
+
+	processors := create_stream_set()
+	find_stream_processor(processors, &page)
+
+}
+
+func main() {
+	process_file(os.Args[1])
 }
