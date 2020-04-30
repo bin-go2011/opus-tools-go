@@ -111,6 +111,14 @@ func process_file(name string) {
 			p.num, p.serial, p.typ)
 	}
 
+	if p.isillegal == 0 {
+		p.process_page(p, &page)
+
+		if p.end > 0 {
+			p.process_end(p)
+			fmt.Printf("Logical stream %d ended\n", p.num)
+		}
+	}
 }
 
 func main() {
