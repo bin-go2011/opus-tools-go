@@ -30,6 +30,7 @@ func find_stream_processor(set *stream_set, page *ogg.Page) *stream_processor {
 		seen_file_icons:     0,
 	}
 	set.streams = append(set.streams, stream)
+	stream.num = len(set.streams)
 
 	{
 		var packet ogg.Packet
@@ -49,10 +50,11 @@ func find_stream_processor(set *stream_set, page *ogg.Page) *stream_processor {
 	}
 	stream.start = page.BeginningOfStream()
 	stream.end = page.EndOfStream()
+	stream.serial = serial
+	stream.shownillegal = 0
 	stream.seqno = page.PageNo()
 
-	fmt.Printf("%#v\n", stream)
-	return nil
+	return &stream
 }
 
 func get_next_page(file *os.File, ogsync *ogg.SyncState, page *ogg.Page, written *int) int {
@@ -102,7 +104,12 @@ func process_file(name string) {
 	get_next_page(file, &ogsync, &page, &written)
 
 	processors := create_stream_set()
-	find_stream_processor(processors, &page)
+	p := find_stream_processor(processors, &page)
+
+	if p.isnew > 0 {
+		fmt.Printf("New logical stream (#%d, serial: %08x): type %s\n",
+			p.num, p.serial, p.typ)
+	}
 
 }
 

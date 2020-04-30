@@ -36,8 +36,8 @@ type stream_processor struct {
 	start int32
 	end   int32
 
-	num int32
-	typ *byte
+	num int
+	typ string
 
 	serial uint32 /* must be 32 bit unsigned */
 	os     ogg.StreamState
@@ -71,7 +71,7 @@ func bytePtrToString(r uintptr) string {
 }
 
 func info_opus_start(stream *stream_processor) {
-	stream.typ, _ = syscall.BytePtrFromString("opus")
+	stream.typ = "opus"
 	stream.process_page = info_opus_process
 	stream.process_end = info_opus_end
 }
