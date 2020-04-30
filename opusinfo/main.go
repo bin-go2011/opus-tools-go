@@ -33,16 +33,25 @@ func find_stream_processor(set *stream_set, page *ogg.Page) *stream_processor {
 
 	{
 		var packet ogg.Packet
-		stream.os.Init(int(serial))
-		stream.os.Pagein(page)
-		res := stream.os.Packetout(&packet)
+		streamState := &(stream.os)
+		streamState.Init(int(serial))
+		streamState.Pagein(page)
+		res := streamState.Packetout(&packet)
 		if res <= 0 {
 
 		} else if packet.Bytes() >= 19 && bytePtrToString(packet.Packet())[:8] == "OpusHead" {
-			fmt.Println("OpusHead")
+			info_opus_start(&stream)
 		}
+
+		res = streamState.Packetout(&packet)
+		streamState.Clear()
+		streamState.Init(int(serial))
 	}
-	fmt.Println(len(set.streams))
+	stream.start = page.BeginningOfStream()
+	stream.end = page.EndOfStream()
+	stream.seqno = page.PageNo()
+
+	fmt.Printf("%#v\n", stream)
 	return nil
 }
 

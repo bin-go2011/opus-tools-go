@@ -23,8 +23,8 @@ func init() {
 }
 
 type stream_processor struct {
-	process_page        uintptr
-	process_end         uintptr
+	process_page        func(*stream_processor, *ogg.Page)
+	process_end         func(*stream_processor)
 	isillegal           int32
 	constraint_violated int32
 	shownillegal        int32
@@ -37,7 +37,7 @@ type stream_processor struct {
 	end   int32
 
 	num int32
-	typ *uint8
+	typ *byte
 
 	serial uint32 /* must be 32 bit unsigned */
 	os     ogg.StreamState
@@ -68,4 +68,18 @@ func bytePtrToString(r uintptr) string {
 	}
 	bval := (*[1 << 10]byte)(unsafe.Pointer(r))
 	return byteSliceToString(bval[:])
+}
+
+func info_opus_start(stream *stream_processor) {
+	stream.typ, _ = syscall.BytePtrFromString("opus")
+	stream.process_page = info_opus_process
+	stream.process_end = info_opus_end
+}
+
+func info_opus_process(stream *stream_processor, page *ogg.Page) {
+
+}
+
+func info_opus_end(stream *stream_processor) {
+
 }
