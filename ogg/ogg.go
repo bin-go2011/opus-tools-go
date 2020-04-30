@@ -1,5 +1,10 @@
 package ogg
 
+import (
+	"reflect"
+	"unsafe"
+)
+
 type SyncState struct {
 	data     uintptr
 	storage  int32
@@ -76,12 +81,15 @@ type Packet struct {
 	packetno   int64
 }
 
-func (op *Packet) Packet() uintptr {
-	return op.packet
-}
+func (op *Packet) Data() []byte {
+	var data []byte
 
-func (op *Packet) Bytes() int32 {
-	return op.bytes
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&data))
+	sliceHeader.Cap = int(op.bytes)
+	sliceHeader.Len = int(op.bytes)
+	sliceHeader.Data = op.packet
+
+	return data
 }
 
 type StreamState struct {
