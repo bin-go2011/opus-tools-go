@@ -46,6 +46,26 @@ func (og *Page) Serialno() int32 {
 	return oggPageSerialno(og)
 }
 
+func (og *Page) Header() string {
+	return bytePtrToString(og.header)
+}
+
+func (og *Page) Body() string {
+	return bytePtrToString(og.body)
+}
+
+func (og *Page) BeginningOfStream() int32 {
+	return oggPageBos(og)
+}
+
+func (og *Page) EndOfStream() int32 {
+	return oggPageEos(og)
+}
+
+func (og *Page) PageNo() int32 {
+	return oggPageNo(og)
+}
+
 type Packet struct {
 	packet uintptr
 	bytes  int32
@@ -106,4 +126,8 @@ func (os *StreamState) Pagein(page *Page) int32 {
 
 func (os *StreamState) Packetout(op *Packet) int32 {
 	return oggStreamPacketout(os, op)
+}
+
+func (os *StreamState) Clear() {
+	oggStreamClear(os)
 }
