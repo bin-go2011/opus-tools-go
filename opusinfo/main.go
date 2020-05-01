@@ -9,6 +9,31 @@ import (
 
 const CHUNK = 4500
 
+func info_opus_end(stream *stream_processor) {
+
+}
+
+func info_opus_process(stream *stream_processor, page *ogg.Page) {
+	var packet ogg.Packet
+	var h OpusHeader
+
+	streamState := &(stream.os)
+	streamState.Pagein(page)
+	streamState.Packetout(&packet)
+
+	opus_header_parse(packet.Data(), &h)
+}
+
+func info_opus_start(stream *stream_processor) {
+	stream.typ = "opus"
+	stream.process_page = info_opus_process
+	stream.process_end = info_opus_end
+}
+
+func create_stream_set() *stream_set {
+	return &stream_set{}
+}
+
 func find_stream_processor(set *stream_set, page *ogg.Page) *stream_processor {
 	var invalid int32
 	var constraint int32
@@ -38,10 +63,11 @@ func find_stream_processor(set *stream_set, page *ogg.Page) *stream_processor {
 		streamState.Init(int(serial))
 		streamState.Pagein(page)
 		res := streamState.Packetout(&packet)
-		if res <= 0 {
-
-		} else if packet.Bytes() >= 19 && bytePtrToString(packet.Packet())[:8] == "OpusHead" {
-			info_opus_start(&stream)
+		if res > 0 {
+			data := packet.Data()
+			if len(data) >= 19 && byteSliceToString(data)[:8] == "OpusHead" {
+				info_opus_start(&stream)
+			}
 		}
 
 		res = streamState.Packetout(&packet)
