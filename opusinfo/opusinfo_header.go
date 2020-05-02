@@ -54,7 +54,7 @@ type stream_processor struct {
 }
 
 type stream_set struct {
-	streams    []stream_processor
+	streams    []*stream_processor
 	in_headers int32
 }
 

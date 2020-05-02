@@ -13,15 +13,14 @@ func find_stream_processor(set *stream_set, page *ogg.Page) *stream_processor {
 
 	serial := uint32(page.Serialno())
 
-	for idx := range set.streams {
-		stream := set.streams[idx]
+	for _, stream := range set.streams {
 		if serial == stream.serial {
 			set.in_headers = 0
 
 			if stream.end > 0 {
 				stream.isillegal = 1
 				stream.constraint_violated = CONSTRAINT_PAGE_AFTER_EOS
-				return &stream
+				return stream
 			}
 
 			stream.isnew = 0
@@ -29,13 +28,13 @@ func find_stream_processor(set *stream_set, page *ogg.Page) *stream_processor {
 			stream.end = page.EndOfStream()
 			stream.serial = serial
 
-			return &stream
+			return stream
 		}
 	}
 
 	set.in_headers = 1
 
-	stream := stream_processor{
+	stream := &stream_processor{
 		isnew:               1,
 		isillegal:           invalid,
 		constraint_violated: constraint,
@@ -53,7 +52,7 @@ func find_stream_processor(set *stream_set, page *ogg.Page) *stream_processor {
 		if res > 0 {
 			data := packet.Data()
 			if len(data) >= 19 && byteSliceToString(data)[:8] == "OpusHead" {
-				info_opus_start(&stream)
+				info_opus_start(stream)
 			}
 		}
 
@@ -66,7 +65,7 @@ func find_stream_processor(set *stream_set, page *ogg.Page) *stream_processor {
 	stream.shownillegal = 0
 	stream.seqno = page.PageNo()
 
-	return &stream
+	return stream
 }
 
 func get_next_page(file *os.File, ogsync *ogg.SyncState, page *ogg.Page, written *int) int {
