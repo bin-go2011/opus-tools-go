@@ -7,7 +7,7 @@ import (
 )
 
 func info_opus_end(stream *stream_processor) {
-
+	fmt.Printf("Opus stream %d:\n", stream.num)
 }
 
 func info_opus_process(stream *stream_processor, page *ogg.Page) {

@@ -86,7 +86,7 @@ func get_next_page(file *os.File, ogsync *ogg.SyncState, page *ogg.Page, written
 
 		n, err := file.Read(bytes)
 		if err != nil {
-			panic(err)
+			return 0
 		}
 		ogsync.Wrote(n)
 		*written += n
@@ -114,8 +114,10 @@ func process_file(name string) {
 	processors := create_stream_set()
 	written := 0
 
-	for i := 0; i < 2; i++ {
-		get_next_page(file, &ogsync, &page, &written)
+	for {
+		if get_next_page(file, &ogsync, &page, &written) == 0 {
+			break
+		}
 
 		p := find_stream_processor(processors, &page)
 
@@ -134,6 +136,7 @@ func process_file(name string) {
 		}
 
 	}
+	fmt.Println("Done.")
 }
 
 func main() {
