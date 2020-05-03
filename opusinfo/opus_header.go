@@ -20,7 +20,7 @@ type OpusHeader struct {
 }
 
 func opus_header_parse(header []byte, h *OpusHeader) int {
-	if byteSliceToString(header[:8]) != "OpusHead" {
+	if string(header)[:8] != "OpusHead" {
 		return 0
 	}
 	h.version = int(header[8])

@@ -51,7 +51,7 @@ func find_stream_processor(set *stream_set, page *ogg.Page) *stream_processor {
 		res := streamState.Packetout(&packet)
 		if res > 0 {
 			data := packet.Data()
-			if len(data) >= 19 && byteSliceToString(data)[:8] == "OpusHead" {
+			if len(data) >= 19 && string(data)[:8] == "OpusHead" {
 				info_opus_start(stream)
 			}
 		}
