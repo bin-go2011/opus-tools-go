@@ -12,11 +12,11 @@ func (og *Page) Serialno() int32 {
 }
 
 func (og *Page) Header() string {
-	return bytePtrToString(og.header)
+	return string(og.header)
 }
 
 func (og *Page) Body() string {
-	return bytePtrToString(og.body)
+	return string(og.body)
 }
 
 func (og *Page) BeginningOfStream() int32 {
