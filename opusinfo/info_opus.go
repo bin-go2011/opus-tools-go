@@ -1,6 +1,10 @@
 package main
 
-import "ogg"
+import (
+	"encoding/binary"
+	"fmt"
+	"ogg"
+)
 
 func info_opus_end(stream *stream_processor) {
 
@@ -13,12 +17,49 @@ func info_opus_process(stream *stream_processor, page *ogg.Page) {
 	streamState := &(stream.os)
 	streamState.Pagein(page)
 
+	inf := stream.data
+	inf.last_eos = int(page.EndOfStream())
+
 	for {
 		res := streamState.Packetout(&packet)
 		if res == 0 {
 			break
 		}
-		opus_header_parse(packet.Data(), &h)
+
+		if inf.doneheaders < 2 {
+			if inf.doneheaders == 0 {
+				opus_header_parse(packet.Data(), &h)
+			} else if inf.doneheaders == 1 {
+				data := packet.Data()
+				if len(data) < 8 || string(data)[:8] != "OpusTags" {
+					err := fmt.Errorf("Could not decode OpusTags header packet %d - invalid Opus stream (%d)\n",
+						inf.doneheaders, stream.num)
+					panic(err)
+				}
+
+				c := 8
+				len := int(binary.LittleEndian.Uint32(data[c:]))
+
+				c += 4
+				fmt.Printf("Encoded with %s\n", string(data[c:c+len]))
+
+				c += len
+				nb_fields := int(binary.LittleEndian.Uint32(data[c:]))
+
+				if nb_fields > 0 {
+					c += 4
+					fmt.Println("User comments section follows...")
+				}
+
+				for i := 0; i < nb_fields; i++ {
+					len = int(binary.LittleEndian.Uint32(data[c:]))
+					c += 4
+					fmt.Printf("\t%s\n", string(data[c:c+len]))
+				}
+			}
+
+			inf.doneheaders += 1
+		}
 	}
 
 }
