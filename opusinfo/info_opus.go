@@ -7,12 +7,17 @@ import (
 )
 
 func info_opus_end(stream *stream_processor) {
+	inf := stream.data
+
 	fmt.Printf("Opus stream %d:\n", stream.num)
+	fmt.Printf("\tPre-skip: %d\n", inf.oh.preskip)
+	fmt.Printf("\tPlayback gain: %f dB\n", float64(inf.oh.gain)/256)
+	fmt.Printf("\tChannels: %d\n", inf.oh.channels)
+	fmt.Printf("\tOriginal sample rate: %d Hz\n", inf.oh.input_sample_rate)
 }
 
 func info_opus_process(stream *stream_processor, page *ogg.Page) {
 	var packet ogg.Packet
-	var h OpusHeader
 
 	streamState := &(stream.os)
 	streamState.Pagein(page)
@@ -28,7 +33,7 @@ func info_opus_process(stream *stream_processor, page *ogg.Page) {
 
 		if inf.doneheaders < 2 {
 			if inf.doneheaders == 0 {
-				opus_header_parse(packet.Data(), &h)
+				opus_header_parse(packet.Data(), &(inf.oh))
 			} else if inf.doneheaders == 1 {
 				data := packet.Data()
 				if len(data) < 8 || string(data)[:8] != "OpusTags" {
