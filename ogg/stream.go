@@ -47,3 +47,11 @@ func (os *StreamState) Packetout(op *Packet) int32 {
 func (os *StreamState) Clear() {
 	oggStreamClear(os)
 }
+
+func (os *StreamState) Destroy() {
+	oggStreamDestroy(os)
+}
+
+func (os *StreamState) ResetSerialno(n int) int32 {
+	return oggStreamResetSerialno(os, n)
+}

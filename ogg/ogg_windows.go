@@ -21,6 +21,8 @@ var (
 	oggStreamPageinProc,
 	oggStreamPacketoutProc,
 	oggStreamClearProc,
+	oggStreamDestroyProc,
+	oggStreamResetSerialnoProc,
 	oggPageBosProc,
 	oggPageEosProc,
 	oggPageNoProc *windows.Proc
@@ -41,6 +43,8 @@ func init() {
 	oggStreamPageinProc = oggDLL.MustFindProc("ogg_stream_pagein")
 	oggStreamPacketoutProc = oggDLL.MustFindProc("ogg_stream_packetout")
 	oggStreamClearProc = oggDLL.MustFindProc("ogg_stream_clear")
+	oggStreamDestroyProc = oggDLL.MustFindProc("ogg_stream_destroy")
+	oggStreamResetSerialnoProc = oggDLL.MustFindProc("ogg_stream_reset_serialno")
 
 	oggPageSerialnoProc = oggDLL.MustFindProc("ogg_page_serialno")
 	oggPageBosProc = oggDLL.MustFindProc("ogg_page_bos")
@@ -100,6 +104,15 @@ func oggStreamPacketout(os *StreamState, op *Packet) int32 {
 
 func oggStreamClear(os *StreamState) {
 	oggStreamClearProc.Call(uintptr(unsafe.Pointer(os)))
+}
+
+func oggStreamDestroy(os *StreamState) {
+	oggStreamDestroyProc.Call(uintptr(unsafe.Pointer(os)))
+}
+
+func oggStreamResetSerialno(os *StreamState, serialno int) int32 {
+	r1, _, _ := oggStreamResetSerialnoProc.Call(uintptr(unsafe.Pointer(os)), uintptr(serialno))
+	return int32(r1)
 }
 
 func oggPageSerialno(og *Page) int32 {
