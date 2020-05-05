@@ -11,7 +11,12 @@ func TestAllPages(t *testing.T) {
 	f, _ := Open(SAMPLE_FILE)
 	defer f.Close()
 
-	for p := range f.Pages() {
-		fmt.Println(p)
+	for {
+		page, err := f.NextPage()
+		if err != nil {
+			break
+		}
+		fmt.Println(page)
+		fmt.Println(string(page.Header()[:4]))
 	}
 }

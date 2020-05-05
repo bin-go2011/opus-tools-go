@@ -1,5 +1,10 @@
 package ogg
 
+import (
+	"reflect"
+	"unsafe"
+)
+
 type Page struct {
 	header     uintptr
 	header_len int32
@@ -11,12 +16,26 @@ func (og *Page) Serialno() int32 {
 	return oggPageSerialno(og)
 }
 
-func (og *Page) Header() string {
-	return string(og.header)
+func (og *Page) Header() []byte {
+	var data []byte
+
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&data))
+	sliceHeader.Cap = int(og.header_len)
+	sliceHeader.Len = int(og.header_len)
+	sliceHeader.Data = og.header
+
+	return data
 }
 
-func (og *Page) Body() string {
-	return string(og.body)
+func (og *Page) Body() []byte {
+	var data []byte
+
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&data))
+	sliceHeader.Cap = int(og.body_len)
+	sliceHeader.Len = int(og.body_len)
+	sliceHeader.Data = og.body
+
+	return data
 }
 
 func (og *Page) BeginningOfStream() int32 {

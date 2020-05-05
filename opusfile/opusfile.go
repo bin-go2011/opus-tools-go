@@ -2,7 +2,6 @@ package opusfile
 
 import (
 	"fmt"
-	"io"
 	"ogg"
 	"os"
 )
@@ -20,7 +19,6 @@ type OpusTags struct {
 type OggOpusFile struct {
 	oy     ogg.SyncState
 	stream *os.File
-	c      chan ogg.Page
 }
 
 func (of *OggOpusFile) Close() {
@@ -40,29 +38,6 @@ func Open(file string) (*OggOpusFile, error) {
 	of.oy.Init()
 
 	return of, nil
-}
-
-func (of *OggOpusFile) Pages() chan ogg.Page {
-	if of.c == nil {
-		of.c = make(chan ogg.Page, 1000)
-		go of.pagesToChannel()
-	}
-
-	return of.c
-}
-
-func (of *OggOpusFile) pagesToChannel() {
-	defer close(of.c)
-	for {
-		page, err := of.NextPage()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			panic(err)
-		}
-
-		of.c <- *page
-	}
 }
 
 func (of *OggOpusFile) NextPage() (*ogg.Page, error) {
