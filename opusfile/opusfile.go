@@ -24,8 +24,8 @@ type OggOpusFile struct {
 }
 
 func (of *OggOpusFile) Close() {
-	of.oy.Clear()
 	of.stream.Close()
+	of.oy.Destroy()
 }
 
 func Open(file string) (*OggOpusFile, error) {
