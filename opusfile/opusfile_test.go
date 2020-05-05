@@ -1,14 +1,17 @@
 package opusfile
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 const SAMPLE_FILE = "../data/big_buck_bunny.opus"
 
-func TestOpenFile(t *testing.T) {
-	file, err := Open(SAMPLE_FILE)
-	if err != nil {
-		t.Error(err)
-		return
+func TestAllPages(t *testing.T) {
+	f, _ := Open(SAMPLE_FILE)
+	defer f.Close()
+
+	for p := range f.Pages() {
+		fmt.Println(p)
 	}
-	defer file.Close()
 }
