@@ -10,20 +10,38 @@ const (
 	CHUNK = 4500
 )
 
-type OpusHead struct {
-}
+const (
+	/*Initial state.*/
+	OP_NOTOPEN = 0
+	/*We've found the first Opus stream in the first link.*/
+	OP_PARTOPEN = 1
+	OP_OPENED   = 2
+	/*We've found the first Opus stream in the current link.*/
+	OP_STREAMSE = 3
+	/*We've initialized the decoder for the chosen Opus stream in the current
+	  link.*/
+	OP_INITSET = 4
+)
 
-type OpusTags struct {
+type OggOpusLink struct {
+	/*The serial number.*/
+	serialno uint32
+	/*The contents of the info header.*/
+	head OpusHead
 }
 
 type OggOpusFile struct {
-	oy     ogg.SyncState
-	stream *os.File
+	oy          ogg.SyncState
+	os          ogg.StreamState
+	stream      *os.File
+	ready_state int
+	links       []OggOpusLink
 }
 
 func (of *OggOpusFile) Close() {
 	of.stream.Close()
 	of.oy.Destroy()
+	of.os.Destroy()
 }
 
 func Open(file string) (*OggOpusFile, error) {
@@ -33,10 +51,13 @@ func Open(file string) (*OggOpusFile, error) {
 	}
 
 	of := &OggOpusFile{
-		stream: f,
+		stream:      f,
+		ready_state: OP_NOTOPEN,
 	}
 	of.oy.Init()
+	of.os.Init(-1)
 
+	of.fetch_headers()
 	return of, nil
 }
 
