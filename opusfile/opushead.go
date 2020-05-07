@@ -67,13 +67,15 @@ func (of *OggOpusFile) fetch_headers() {
 	}
 
 	op := ogg.Packet{}
-	of.links = append(of.links, OggOpusLink{})
 
 	streamState := of.os
 	streamState.ResetSerialno(int(page.Serialno()))
 	streamState.Pagein(page)
 	streamState.Packetout(&op)
 
+	of.links = append(of.links, OggOpusLink{
+		serialno: uint32(streamState.Serialno()),
+	})
 	res := opus_head_parse(op.Data(), &(of.links[0].head))
 	if res < 0 {
 		err := fmt.Errorf("failed to fetch header, error code=%d", res)
