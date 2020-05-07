@@ -36,7 +36,7 @@ func info_opus_process(stream *stream_processor, page *ogg.Page) {
 				opus_header_parse(packet.Data(), &(inf.oh))
 			} else if inf.doneheaders == 1 {
 				data := packet.Data()
-				if len(data) < 8 || string(data)[:8] != "OpusTags" {
+				if len(data) < 8 || string(data[:8]) != "OpusTags" {
 					err := fmt.Errorf("Could not decode OpusTags header packet %d - invalid Opus stream (%d)\n",
 						inf.doneheaders, stream.num)
 					panic(err)
