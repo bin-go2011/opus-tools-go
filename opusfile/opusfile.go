@@ -28,6 +28,7 @@ type OggOpusLink struct {
 	serialno uint32
 	/*The contents of the info header.*/
 	head OpusHead
+	tags OpusTags
 }
 
 type OggOpusFile struct {

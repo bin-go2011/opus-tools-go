@@ -60,10 +60,10 @@ type OpusHead struct {
 	gain              int /* in dB S7.8 should be zero whenever possible */
 }
 
-func (of *OggOpusFile) fetch_headers() (*OpusHead, error) {
+func (of *OggOpusFile) fetch_headers() {
 	page, err := of.NextPage()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	op := ogg.Packet{}
@@ -77,9 +77,16 @@ func (of *OggOpusFile) fetch_headers() (*OpusHead, error) {
 	res := opus_head_parse(op.Data(), &(of.links[0].head))
 	if res < 0 {
 		err := fmt.Errorf("failed to fetch header, error code=%d", res)
-		return nil, err
+		panic(err)
 	}
-	return &(of.links[0].head), nil
+
+	page, err = of.NextPage()
+	if err != nil {
+		panic(err)
+	}
+	streamState.Pagein(page)
+	streamState.Packetout(&op)
+	opus_tags_parse(op.Data(), &(of.links[0].tags))
 }
 
 func opus_head_parse(data []byte, head *OpusHead) int {
