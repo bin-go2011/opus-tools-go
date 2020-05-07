@@ -55,3 +55,7 @@ func (os *StreamState) Destroy() {
 func (os *StreamState) ResetSerialno(n int) int32 {
 	return oggStreamResetSerialno(os, n)
 }
+
+func (os *StreamState) Serialno() int32 {
+	return os.serialno
+}
